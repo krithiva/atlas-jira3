@@ -1,0 +1,43 @@
+version: '2'
+
+services:
+  jira:
+    image: eugenmayer/jira:${JIRA_VERSION}
+    build:
+      context: ./
+      args:
+        JIRA_VERSION: ${JIRA_VERSION}
+    container_name: jirasoftware
+    volumes:
+      - jiradata:/var/atlassian/jira
+    ports:
+      - '80:8080'
+    environment:
+      - 'JIRA_DATABASE_URL=postgresql://jira@postgresql/jiradb'
+      - 'JIRA_DB_PASSWORD=jellyfish'
+      - 'CATALINA_OPTS= -Xms256m -Xmx1g'
+      - 'JIRA_PROXY_NAME='
+      - 'JIRA_PROXY_PORT='
+      - 'JIRA_PROXY_SCHEME='
+      - 'DOCKER_WAIT_HOST=postgresql'
+      - 'DOCKER_WAIT_PORT=5432'
+
+  postgresql:
+    image: blacklabelops/postgres
+    hostname: postgresql
+    volumes:
+      - postgresqldata:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_USER=jira'
+      # CHANGE THE PASSWORD!
+      - 'POSTGRES_PASSWORD=jellyfish'
+      - 'POSTGRES_DB=jiradb'
+      - 'POSTGRES_ENCODING=UNICODE'
+      - 'POSTGRES_COLLATE=C'
+      - 'POSTGRES_COLLATE_TYPE=C'
+
+volumes:
+  jiradata:
+    external: false
+  postgresqldata:
+    external: false

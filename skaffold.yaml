@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/krithiva/docker-image-atlassian-jira:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/krithiva/docker-image-atlassian-jira:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: docker-image-atlassian-jira
+        chartPath: charts/docker-image-atlassian-jira
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/krithiva/docker-image-atlassian-jira'
+          image.tag: '{{.DIGEST_HEX}}'
